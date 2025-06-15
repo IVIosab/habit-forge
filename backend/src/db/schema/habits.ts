@@ -11,3 +11,5 @@ export const habits = sqliteTable('habits', {
     created_at: text('created_at').notNull().default(sql`(current_timestamp)`),
     user_id: text('user_id').notNull().references(() => users.id),
 });
+export type Habit = typeof habits.$inferSelect;
+export type NewHabit = typeof habits.$inferInsert;

@@ -10,3 +10,5 @@ export const users = sqliteTable('users', {
     hashedPassword: text('hashed_password').notNull(),
     createdAt: text('created_at').notNull().default(sql`(current_timestamp)`),
 });
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;

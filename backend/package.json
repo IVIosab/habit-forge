@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "seed": "npx tsx src/db/seed.ts",
+    "prep": "rm src/db/sqlite.db && npx drizzle-kit push && npx tsx src/db/seed.ts",
     "dev": "npx tsx src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js"

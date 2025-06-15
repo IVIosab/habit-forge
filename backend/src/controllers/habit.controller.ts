@@ -9,7 +9,7 @@ import {
 import { assert } from "console";
 
 // Temporary hardcoded user ID
-const mockUserId = "1";
+const mockUserId = "EXAMPLE_USER_ID";
 
 // GET /habits
 export async function getAllHabits(req: Request, res: Response) {
@@ -47,7 +47,7 @@ export async function getHabitById(req: Request, res: Response) {
 export async function updateHabit(req: Request, res: Response) {
   const habitId = req.params.id;
   const { name } = req.body;
-  
+
   if (!name) {
     res.status(400).json({ message: "Name is required." });
     return;
