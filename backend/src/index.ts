@@ -1,15 +1,17 @@
 import express, { Request, Response } from "express";
 import router from "./routes/index.js";
+import { logger } from "./middlewares/logging.middleware.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(logger);
 
-app.use(router);
+app.use("/api", router);
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/api", (req: Request, res: Response) => {
     res.send("Welcome to LinkNest API!");
 });
 
