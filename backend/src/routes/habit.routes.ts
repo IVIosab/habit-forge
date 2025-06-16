@@ -1,5 +1,5 @@
 import express from "express";
-// import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 import {
   createHabit,
   deleteHabit,
@@ -11,7 +11,7 @@ import {
 const router = express.Router();
 
 // Apply auth middleware to all /habits routes
-// router.use("/habits", authMiddleware);
+router.use("/habits", authMiddleware);
 
 // GET /habits → get all habits for current user
 router.get("/habits", getAllHabits);
@@ -20,7 +20,7 @@ router.get("/habits", getAllHabits);
 router.post("/habits", createHabit);
 
 // GET /habits/:id → get one habit by id
-router.get("/habits/:id", updateHabit);
+router.get("/habits/:id", getHabitById);
 
 // PUT /habits/:id → update habit name (optional)
 router.put("/habits/:id", updateHabit);

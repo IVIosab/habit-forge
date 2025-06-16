@@ -4,25 +4,13 @@ import { findUserById } from "../db/queries/users.query.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_default_secret";
 
-// Extend Express Request to include `user` field 
-// TODO: Move it to index.d.ts 
-declare global {
-    namespace Express {
-        interface Request {
-            user?: {
-                id: string;
-                email: string;
-            };
-        }
-    }
-}
-
 // Authentication middleware
 export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
     const token = req.cookies?.token;
 
     if (!token) {
-        return res.status(401).json({ message: "Unauthorized: No token provided." });
+        res.status(401).json({ message: "Unauthorized: No token provided." });
+        return;
     }
 
     try {
@@ -30,7 +18,8 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
         const user = await findUserById(decoded.id);
 
         if (!user) {
-            return res.status(401).json({ message: "Unauthorized: User not found." });
+            res.status(401).json({ message: "Unauthorized: User not found." });
+            return;
         }
 
         req.user = {
@@ -40,6 +29,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
 
         next();
     } catch (err) {
-        return res.status(401).json({ message: "Unauthorized: Invalid token." });
+        res.status(401).json({ message: "Unauthorized: Invalid token." });
+        return;
     }
 }
