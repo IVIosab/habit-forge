@@ -1,5 +1,6 @@
 import { columns, Habit } from "./columns";
 import { DataTable } from "./data-table";
+import HabitTableClient from "./HabitTableClient";
 
 async function getData(): Promise<Habit[]> {
 	// Fetch data from your API here.
@@ -70,13 +71,5 @@ async function getData(): Promise<Habit[]> {
 export default async function DemoPage() {
 	const data = await getData();
 
-	return (
-		// <div className="flex flex-1 flex-col">
-		// 	<div className="@container/main flex flex-1 flex-col gap-2">
-		// 		<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-		<DataTable columns={columns} data={data} />
-		// 		</div>
-		// 	</div>
-		// </div>
-	);
+	return <HabitTableClient />;
 }
