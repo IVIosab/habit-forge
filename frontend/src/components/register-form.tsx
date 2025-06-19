@@ -1,68 +1,68 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { authClient } from "@/lib/authClient";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { authClient } from "@/lib/authClient"
 
 export function RegisterForm({
 	className,
 	...props
 }: React.ComponentProps<"div">) {
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const router = useRouter();
+	const [isLoading, setIsLoading] = useState(false)
+	const [error, setError] = useState<string | null>(null)
+	const router = useRouter()
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		setIsLoading(true);
-		setError(null);
+		e.preventDefault()
+		setIsLoading(true)
+		setError(null)
 
-		const formData = new FormData(e.currentTarget);
-		const name = formData.get("name") as string;
-		const email = formData.get("email") as string;
-		const password = formData.get("password") as string;
+		const formData = new FormData(e.currentTarget)
+		const name = formData.get("name") as string
+		const email = formData.get("email") as string
+		const password = formData.get("password") as string
 
 		try {
 			const { data, error } = await authClient.signUp.email({
 				email,
 				password,
-				name,
-			});
+				name
+			})
 
 			if (error) {
-				setError(error.message || "Registration failed");
-				return;
+				setError(error.message || "Registration failed")
+				return
 			}
 
-			router.push("/login");
+			router.push("/login")
 		} catch (err) {
-			setError("An unexpected error occurred");
+			setError("An unexpected error occurred")
 		} finally {
-			setIsLoading(false);
+			setIsLoading(false)
 		}
-	};
+	}
 
 	const handleGoogleSignUp = async () => {
-		setIsLoading(true);
-		setError(null);
+		setIsLoading(true)
+		setError(null)
 
 		try {
 			await authClient.signIn.social({
 				provider: "google",
-				callbackURL: "/login",
-			});
+				callbackURL: "/login"
+			})
 		} catch (err) {
-			setError("Google registration failed");
-			setIsLoading(false);
+			setError("Google registration failed")
+			setIsLoading(false)
 		}
-	};
+	}
 
 	return (
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -116,11 +116,7 @@ export function RegisterForm({
 								/>
 							</div>
 							<div className="flex flex-col gap-3">
-								<Button
-									type="submit"
-									className="w-full"
-									disabled={isLoading}
-								>
+								<Button type="submit" className="w-full" disabled={isLoading}>
 									{isLoading ? "Registering..." : "Register"}
 								</Button>
 								<Button
@@ -130,18 +126,13 @@ export function RegisterForm({
 									onClick={handleGoogleSignUp}
 									disabled={isLoading}
 								>
-									{isLoading
-										? "Loading..."
-										: "Register with Google"}
+									{isLoading ? "Loading..." : "Register with Google"}
 								</Button>
 							</div>
 						</div>
 						<div className="mt-4 text-center text-sm">
 							Already have an account?{" "}
-							<a
-								href="/login"
-								className="underline underline-offset-4"
-							>
+							<a href="/login" className="underline underline-offset-4">
 								Login
 							</a>
 						</div>
@@ -149,5 +140,5 @@ export function RegisterForm({
 				</CardContent>
 			</Card>
 		</div>
-	);
+	)
 }

@@ -7,20 +7,20 @@ import {
 	SidebarGroupLabel,
 	SidebarMenu,
 	SidebarMenuButton,
-	SidebarMenuItem,
-} from "@/components/ui/sidebar";
+	SidebarMenuItem
+} from "@/components/ui/sidebar"
 
 // Menu items.
 const items = [
 	{
 		title: "Habits",
-		url: "/habits",
+		url: "/habits"
 	},
 	{
 		title: "Statistics",
-		url: "/statistics",
-	},
-];
+		url: "/statistics"
+	}
+]
 
 export function AppSidebar() {
 	return (
@@ -46,5 +46,5 @@ export function AppSidebar() {
                 //TODO Add user card footer in sidebar.
             </SidebarFooter> */}
 		</Sidebar>
-	);
+	)
 }

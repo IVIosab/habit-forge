@@ -1,23 +1,23 @@
-"use client";
+"use client"
 
-import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table"
+import { MoreHorizontal, ArrowUpDown } from "lucide-react"
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+	DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 
 export type Habit = {
-	id: string;
-	user_id: string;
-	name: string;
-};
+	id: string
+	user_id: string
+	name: string
+}
 
 export const columns: ColumnDef<Habit>[] = [
 	{
@@ -26,20 +26,18 @@ export const columns: ColumnDef<Habit>[] = [
 			return (
 				<Button
 					variant="ghost"
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === "asc")
-					}
+					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 				>
 					Name
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
-			);
-		},
+			)
+		}
 	},
 	{
 		id: "actions",
 		cell: ({ row }) => {
-			const payment = row.original;
+			const payment = row.original
 			return (
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
@@ -55,10 +53,10 @@ export const columns: ColumnDef<Habit>[] = [
 						<DropdownMenuItem>Delete</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
-			);
-		},
-	},
-];
+			)
+		}
+	}
+]
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 // export type Payment = {

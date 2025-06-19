@@ -1,6 +1,6 @@
-import { columns, Habit } from "./columns";
-import { DataTable } from "./data-table";
-import HabitTableClient from "./HabitTableClient";
+import { columns, Habit } from "./columns"
+import { DataTable } from "./data-table"
+import HabitTableClient from "./HabitTableClient"
 
 async function getData(): Promise<Habit[]> {
 	// Fetch data from your API here.
@@ -8,68 +8,68 @@ async function getData(): Promise<Habit[]> {
 		{
 			id: "728ed52f",
 			user_id: "123",
-			name: "Sleep",
+			name: "Sleep"
 		},
 		{
 			id: "a913be21",
 			user_id: "123",
-			name: "Exercise",
+			name: "Exercise"
 		},
 		{
 			id: "c8f2d45e",
 			user_id: "123",
-			name: "Read for 30 minutes",
+			name: "Read for 30 minutes"
 		},
 		{
 			id: "9f16c3d2",
 			user_id: "123",
-			name: "Drink 2L of water",
+			name: "Drink 2L of water"
 		},
 		{
 			id: "4b0a8d89",
 			user_id: "123",
-			name: "Meditate",
+			name: "Meditate"
 		},
 		{
 			id: "d3700e1c",
 			user_id: "123",
-			name: "No sugar",
+			name: "No sugar"
 		},
 		{
 			id: "f582dc7a",
 			user_id: "123",
-			name: "Practice coding",
+			name: "Practice coding"
 		},
 		{
 			id: "1a7e3b0c",
 			user_id: "123",
-			name: "Clean room",
+			name: "Clean room"
 		},
 		{
 			id: "e394bc8f",
 			user_id: "123",
-			name: "Limit social media",
+			name: "Limit social media"
 		},
 		{
 			id: "b56f9021",
 			user_id: "123",
-			name: "Journal",
+			name: "Journal"
 		},
 		{
 			id: "3c9ad847",
 			user_id: "123",
-			name: "Plan tomorrow",
+			name: "Plan tomorrow"
 		},
 		{
 			id: "fe6d4210",
 			user_id: "123",
-			name: "Take vitamins",
-		},
-	];
+			name: "Take vitamins"
+		}
+	]
 }
 
 export default async function DemoPage() {
-	const data = await getData();
+	const data = await getData()
 
-	return <HabitTableClient />;
+	return <HabitTableClient />
 }

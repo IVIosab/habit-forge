@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export default function Component() {
 	return (
@@ -7,9 +7,7 @@ export default function Component() {
 			{/* Header */}
 			<header className="px-4 lg:px-6 h-16 flex items-center border-b bg-white/80 backdrop-blur-sm">
 				<div className="flex items-center justify-center">
-					<h1 className="text-2xl font-bold text-slate-900">
-						HabitForge
-					</h1>
+					<h1 className="text-2xl font-bold text-slate-900">HabitForge</h1>
 				</div>
 			</header>
 
@@ -24,24 +22,18 @@ export default function Component() {
 									Forge your future, one habit at a time.
 								</h2>
 								<p className="mx-auto max-w-3xl text-lg md:text-xl text-slate-600 leading-relaxed">
-									HabitForge is a sleek, modern habit tracker
-									that helps you build powerful routines and
-									visualize your progress with ease. With an
-									intuitive UI, daily habit check-ins, and
-									beautiful charts, you'll stay motivated and
-									consistent — whether you're drinking more
-									water, reading, or hitting the gym. Designed
-									for focus. Built for change.
+									HabitForge is a sleek, modern habit tracker that helps you
+									build powerful routines and visualize your progress with ease.
+									With an intuitive UI, daily habit check-ins, and beautiful
+									charts, you'll stay motivated and consistent — whether you're
+									drinking more water, reading, or hitting the gym. Designed for
+									focus. Built for change.
 								</p>
 							</div>
 
 							{/* CTA Buttons */}
 							<div className="flex flex-col sm:flex-row gap-4 pt-8">
-								<Button
-									asChild
-									size="lg"
-									className="text-lg px-8 py-6 h-auto"
-								>
+								<Button asChild size="lg" className="text-lg px-8 py-6 h-auto">
 									<Link href="/register">Get Started</Link>
 								</Button>
 								<Button
@@ -62,11 +54,10 @@ export default function Component() {
 			<footer className="w-full py-6 px-4 md:px-6 border-t bg-white/80 backdrop-blur-sm">
 				<div className="container mx-auto">
 					<p className="text-center text-sm text-slate-500">
-						© {new Date().getFullYear()} HabitForge. Built for
-						change.
+						© {new Date().getFullYear()} HabitForge. Built for change.
 					</p>
 				</div>
 			</footer>
 		</div>
-	);
+	)
 }

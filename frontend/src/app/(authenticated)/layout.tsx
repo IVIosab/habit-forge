@@ -1,10 +1,10 @@
 import {
 	SidebarInset,
 	SidebarProvider,
-	SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import { Label } from "@/components/ui/label";
+	SidebarTrigger
+} from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
+import { Label } from "@/components/ui/label"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 	return (
@@ -18,5 +18,5 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 				<SidebarInset>{children}</SidebarInset>
 			</main>
 		</SidebarProvider>
-	);
+	)
 }

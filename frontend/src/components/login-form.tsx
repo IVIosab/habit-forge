@@ -1,97 +1,96 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { authClient } from "@/lib/authClient";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { authClient } from "@/lib/authClient"
 
 export function LoginForm({
 	className,
 	...props
 }: React.ComponentProps<"div">) {
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const router = useRouter();
+	const [isLoading, setIsLoading] = useState(false)
+	const [error, setError] = useState<string | null>(null)
+	const router = useRouter()
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		setIsLoading(true);
-		setError(null);
+		e.preventDefault()
+		setIsLoading(true)
+		setError(null)
 
-		const formData = new FormData(e.currentTarget);
-		const email = formData.get("email") as string;
-		const password = formData.get("password") as string;
+		const formData = new FormData(e.currentTarget)
+		const email = formData.get("email") as string
+		const password = formData.get("password") as string
 
 		try {
 			const { data, error } = await authClient.signIn.email({
 				email,
-				password,
-			});
+				password
+			})
 
 			if (error) {
-				setError(error.message || "Login failed");
-				return;
+				setError(error.message || "Login failed")
+				return
 			}
 
-			router.push("/habits");
+			router.push("/habits")
 		} catch (err) {
-			setError("An unexpected error occurred");
+			setError("An unexpected error occurred")
 		} finally {
-			setIsLoading(false);
+			setIsLoading(false)
 		}
-	};
+	}
 
 	const handleGoogleSignIn = async () => {
-		setIsLoading(true);
-		setError(null);
+		setIsLoading(true)
+		setError(null)
 
 		try {
 			await authClient.signIn.social({
 				provider: "google",
-				callbackURL: "/habits",
-			});
+				callbackURL: "/habits"
+			})
 		} catch (err) {
-			setError("Google login failed");
-			setIsLoading(false);
+			setError("Google login failed")
+			setIsLoading(false)
 		}
-	};
+	}
 
 	const handleForgotPassword = async () => {
-		const email = (document.getElementById("email") as HTMLInputElement)
-			?.value;
+		const email = (document.getElementById("email") as HTMLInputElement)?.value
 
 		if (!email) {
-			setError("Please enter your email address first");
-			return;
+			setError("Please enter your email address first")
+			return
 		}
 
-		setIsLoading(true);
-		setError(null);
+		setIsLoading(true)
+		setError(null)
 
 		try {
 			const { error } = await authClient.forgetPassword({
 				email,
-				redirectTo: "/reset-password",
-			});
+				redirectTo: "/reset-password"
+			})
 
 			if (error) {
-				setError(error.message || "Failed to send reset email");
-				return;
+				setError(error.message || "Failed to send reset email")
+				return
 			}
 
-			setError("Password reset email sent! Check your inbox.");
+			setError("Password reset email sent! Check your inbox.")
 		} catch (err) {
-			setError("Failed to send reset email");
+			setError("Failed to send reset email")
 		} finally {
-			setIsLoading(false);
+			setIsLoading(false)
 		}
-	};
+	}
 
 	return (
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -146,11 +145,7 @@ export function LoginForm({
 								/>
 							</div>
 							<div className="flex flex-col gap-3">
-								<Button
-									type="submit"
-									className="w-full"
-									disabled={isLoading}
-								>
+								<Button type="submit" className="w-full" disabled={isLoading}>
 									{isLoading ? "Logging in..." : "Login"}
 								</Button>
 								<Button
@@ -160,18 +155,13 @@ export function LoginForm({
 									onClick={handleGoogleSignIn}
 									disabled={isLoading}
 								>
-									{isLoading
-										? "Loading..."
-										: "Login with Google"}
+									{isLoading ? "Loading..." : "Login with Google"}
 								</Button>
 							</div>
 						</div>
 						<div className="mt-4 text-center text-sm">
 							Don&apos;t have an account?{" "}
-							<a
-								href="/register"
-								className="underline underline-offset-4"
-							>
+							<a href="/register" className="underline underline-offset-4">
 								Register
 							</a>
 						</div>
@@ -179,5 +169,5 @@ export function LoginForm({
 				</CardContent>
 			</Card>
 		</div>
-	);
+	)
 }
