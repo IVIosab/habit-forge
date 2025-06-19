@@ -1,5 +1,5 @@
 import { db } from "../index.js";
-import { habits } from "../schema/habits.js";
+import { habits } from "../schema/api/habits.js";
 import { eq } from "drizzle-orm";
 
 // GET all habits for a user

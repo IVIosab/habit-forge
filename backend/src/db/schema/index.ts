@@ -1,5 +1,5 @@
-import { habits } from "./habits";
-import { habit_entries } from "./habit_entries";
-import { users } from "./users";
+import { habits, habit_entries } from "./api";
+import { user, account, session, verification } from "./auth";
 
-export { habits, habit_entries, users };
+export { habits, habit_entries };
+export { user, account, session, verification };

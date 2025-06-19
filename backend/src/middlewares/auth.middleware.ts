@@ -1,35 +1,18 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import { findUserById } from "../db/queries/users.query.js";
+import { auth } from "../utils/auth";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your_default_secret";
+export const authMiddleware = async (req: any, res: any, next: any) => {
+  try {
+    const session = await auth.api.getSession({
+      headers: req.headers,
+    });
 
-// Authentication middleware
-export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
-    const token = req.cookies?.token;
-
-    if (!token) {
-        res.status(401).json({ message: "Unauthorized: No token provided." });
-        return;
+    if (!session) {
+      return res.status(401).json({ error: "Please sign in" });
     }
 
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
-        const user = await findUserById(decoded.id);
-
-        if (!user) {
-            res.status(401).json({ message: "Unauthorized: User not found." });
-            return;
-        }
-
-        req.user = {
-            id: user.id,
-            email: user.email,
-        };
-
-        next();
-    } catch (err) {
-        res.status(401).json({ message: "Unauthorized: Invalid token." });
-        return;
-    }
-}
+    req.user = session.user;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: "Invalid session" });
+  }
+};
