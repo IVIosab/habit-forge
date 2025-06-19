@@ -1,36 +1,50 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
+import { columns } from "./columns"
 import { DataTable } from "./data-table"
-import { columns, Habit } from "./columns"
 
-export default function HabitTableClient() {
-	const [habits, setHabits] = useState<Habit[]>([])
-	const [loading, setLoading] = useState(true)
-	const [error, setError] = useState<string | null>(null)
+interface Habit {
+  id: string
+  user_id: string
+  name: string
+}
 
-	useEffect(() => {
-		async function fetchHabits() {
-			try {
-				const res = await fetch("http://localhost:3000/api/habits", {
-					method: "GET",
-					credentials: "include"
-				})
-				if (!res.ok) throw new Error("Failed to fetch habits.")
-				const data = await res.json()
-				setHabits(data)
-			} catch (err: any) {
-				setError(err.message || "Something went wrong.")
-			} finally {
-				setLoading(false)
-			}
-		}
+export function HabitTableClient() {
+  const [habits, setHabits] = useState<Habit[]>([])
 
-		fetchHabits()
-	}, [])
+  useEffect(() => {
+    fetchHabits()
+  }, [])
 
-	if (loading) return <p className="text-muted">Loading...</p>
-	if (error) return <p className="text-red-500">{error}</p>
+  async function fetchHabits() {
+    const res = await fetch("http://localhost:3000/api/habits", {
+      cache: "no-store",
+      credentials: "include"
+    })
+    const habits = await res.json()
+    setHabits(habits)
+  }
 
-	return <DataTable columns={columns} data={habits} />
+  async function addHabit(name: string) {
+    try {
+      const res = await fetch("http://localhost:3000/api/habits", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({ name })
+      })
+
+      if (!res.ok) throw new Error("Failed to add habit.")
+
+      const newHabit = await res.json()
+      setHabits((prev) => [...prev, newHabit])
+    } catch (err: any) {
+      throw new Error(err.message || "Failed to add habit.")
+    }
+  }
+
+  return <DataTable columns={columns} data={habits} onAddHabit={addHabit} />
 }
