@@ -1,5 +1,5 @@
-import { HabitTableClient } from "./HabitTableClient"
+import { HabitsClient } from "./habits-client"
 
 export default async function DemoPage() {
-  return <HabitTableClient />
+  return <HabitsClient />
 }

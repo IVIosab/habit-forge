@@ -14,23 +14,43 @@ import {
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select"
 
 interface AddHabitDialogProps {
-  onAddHabit: (name: string) => Promise<void>
+  onAddHabit: (data: {
+    title: string
+    description?: string
+    priority?: string
+  }) => Promise<void>
 }
 
 export function AddHabitDialog({ onAddHabit }: AddHabitDialogProps) {
   const [isOpen, setIsOpen] = React.useState(false)
-  const [habitName, setHabitName] = React.useState("")
+  const [formData, setFormData] = React.useState({
+    title: "",
+    description: "",
+    priority: "none"
+  })
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
   const handleAddHabit = async () => {
-    if (!habitName.trim()) return
+    if (!formData.title.trim() || formData.title.trim().length < 3) return
 
     setIsSubmitting(true)
     try {
-      await onAddHabit(habitName.trim())
-      setHabitName("")
+      await onAddHabit({
+        title: formData.title.trim(),
+        description: formData.description.trim() || undefined,
+        priority: formData.priority
+      })
+      setFormData({ title: "", description: "", priority: "none" })
       setIsOpen(false)
     } catch (error) {
       console.error("Failed to add habit:", error)
@@ -40,7 +60,7 @@ export function AddHabitDialog({ onAddHabit }: AddHabitDialogProps) {
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
       handleAddHabit()
     }
   }
@@ -60,23 +80,64 @@ export function AddHabitDialog({ onAddHabit }: AddHabitDialogProps) {
         <DialogHeader>
           <DialogTitle>Add New Habit</DialogTitle>
           <DialogDescription>
-            Enter the name of your new habit. Click save when you're done.
+            Create a new habit to track. Fill in the details below.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="habit-name" className="text-right">
-              Name
+            <Label htmlFor="habit-title" className="text-right">
+              Title *
             </Label>
             <Input
-              id="habit-name"
-              value={habitName}
-              onChange={(e) => setHabitName(e.target.value)}
+              id="habit-title"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
+              }
               className="col-span-3"
-              placeholder="Enter habit name..."
+              placeholder="Enter habit title..."
               onKeyDown={handleKeyDown}
               autoFocus
             />
+          </div>
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label htmlFor="habit-description" className="text-right pt-2">
+              Description
+            </Label>
+            <Textarea
+              id="habit-description"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value
+                }))
+              }
+              className="col-span-3"
+              placeholder="Optional description..."
+              rows={3}
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="habit-priority" className="text-right">
+              Priority
+            </Label>
+            <Select
+              value={formData.priority}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, priority: value }))
+              }
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <DialogFooter>
@@ -90,7 +151,11 @@ export function AddHabitDialog({ onAddHabit }: AddHabitDialogProps) {
           <Button
             type="submit"
             onClick={handleAddHabit}
-            disabled={!habitName.trim() || isSubmitting}
+            disabled={
+              !formData.title.trim() ||
+              formData.title.trim().length < 3 ||
+              isSubmitting
+            }
           >
             {isSubmitting ? "Adding..." : "Add Habit"}
           </Button>

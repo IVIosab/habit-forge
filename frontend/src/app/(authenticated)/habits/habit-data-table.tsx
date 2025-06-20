@@ -1,11 +1,14 @@
 "use client"
+
 import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  type SortingState,
   useReactTable
 } from "@tanstack/react-table"
-
+import { useState } from "react"
 import {
   Table,
   TableBody,
@@ -14,28 +17,47 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table"
-
 import { AddHabitDialog } from "./add-habit-dialog"
+import type { HabitWithCompletion } from "@/types"
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  onAddHabit?: (name: string) => Promise<void>
+interface HabitDataTableProps {
+  columns: ColumnDef<HabitWithCompletion, any>[]
+  data: HabitWithCompletion[]
+  onAddHabit?: (data: {
+    title: string
+    description?: string
+    priority?: string
+  }) => Promise<void>
+  title: string
 }
 
-export function DataTable<TData, TValue>({
+export function HabitDataTable({
   columns,
   data,
-  onAddHabit
-}: DataTableProps<TData, TValue>) {
+  onAddHabit,
+  title
+}: HabitDataTableProps) {
+  const [sorting, setSorting] = useState<SortingState>([])
+
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel()
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    state: {
+      sorting
+    }
   })
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">{title}</h2>
+        <span className="text-sm text-muted-foreground">
+          {data.length} habit{data.length !== 1 ? "s" : ""}
+        </span>
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -43,7 +65,10 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      style={{ width: header.getSize() }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -74,11 +99,13 @@ export function DataTable<TData, TValue>({
                     ))}
                   </TableRow>
                 ))}
-                <TableRow className="hover:bg-muted/50">
-                  <TableCell colSpan={columns.length}>
-                    <AddHabitDialog onAddHabit={onAddHabit!} />
-                  </TableCell>
-                </TableRow>
+                {onAddHabit && (
+                  <TableRow className="hover:bg-muted/50">
+                    <TableCell colSpan={columns.length}>
+                      <AddHabitDialog onAddHabit={onAddHabit} />
+                    </TableCell>
+                  </TableRow>
+                )}
               </>
             ) : (
               <>
@@ -87,14 +114,16 @@ export function DataTable<TData, TValue>({
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    No habits found.
                   </TableCell>
                 </TableRow>
-                <TableRow className="hover:bg-muted/50">
-                  <TableCell colSpan={columns.length}>
-                    <AddHabitDialog onAddHabit={onAddHabit!} />
-                  </TableCell>
-                </TableRow>
+                {onAddHabit && (
+                  <TableRow className="hover:bg-muted/50">
+                    <TableCell colSpan={columns.length}>
+                      <AddHabitDialog onAddHabit={onAddHabit} />
+                    </TableCell>
+                  </TableRow>
+                )}
               </>
             )}
           </TableBody>

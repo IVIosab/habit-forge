@@ -12,13 +12,24 @@ import {
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import type { Habit } from "./columns"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select"
+import type { Habit } from "@/types"
 
 interface EditHabitDialogProps {
   habit: Habit
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  onEditHabit: (id: string, name: string) => Promise<void>
+  onEditHabit: (
+    id: string,
+    data: { title: string; description?: string; priority?: string }
+  ) => Promise<void>
 }
 
 export function EditHabitDialog({
@@ -27,19 +38,31 @@ export function EditHabitDialog({
   onOpenChange,
   onEditHabit
 }: EditHabitDialogProps) {
-  const [habitName, setHabitName] = React.useState(habit.name)
+  const [formData, setFormData] = React.useState({
+    title: habit.title,
+    description: habit.description || "",
+    priority: habit.priority
+  })
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
   React.useEffect(() => {
-    setHabitName(habit.name)
-  }, [habit.name])
+    setFormData({
+      title: habit.title,
+      description: habit.description || "",
+      priority: habit.priority
+    })
+  }, [habit])
 
   const handleEditHabit = async () => {
-    if (!habitName.trim()) return
+    if (!formData.title.trim() || formData.title.trim().length < 3) return
 
     setIsSubmitting(true)
     try {
-      await onEditHabit(habit.id, habitName.trim())
+      await onEditHabit(habit.id, {
+        title: formData.title.trim(),
+        description: formData.description.trim() || undefined,
+        priority: formData.priority
+      })
       onOpenChange(false)
     } catch (error) {
       console.error("Failed to edit habit:", error)
@@ -49,7 +72,7 @@ export function EditHabitDialog({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
       handleEditHabit()
     }
   }
@@ -65,18 +88,59 @@ export function EditHabitDialog({
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-habit-name" className="text-right">
-              Name
+            <Label htmlFor="edit-habit-title" className="text-right">
+              Title *
             </Label>
             <Input
-              id="edit-habit-name"
-              value={habitName}
-              onChange={(e) => setHabitName(e.target.value)}
+              id="edit-habit-title"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
+              }
               className="col-span-3"
-              placeholder="Enter habit name..."
+              placeholder="Enter habit title..."
               onKeyDown={handleKeyDown}
               autoFocus
             />
+          </div>
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label htmlFor="edit-habit-description" className="text-right pt-2">
+              Description
+            </Label>
+            <Textarea
+              id="edit-habit-description"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value
+                }))
+              }
+              className="col-span-3"
+              placeholder="Optional description..."
+              rows={3}
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="edit-habit-priority" className="text-right">
+              Priority
+            </Label>
+            <Select
+              value={formData.priority}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, priority: value as any }))
+              }
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <DialogFooter>
@@ -90,7 +154,11 @@ export function EditHabitDialog({
           <Button
             type="submit"
             onClick={handleEditHabit}
-            disabled={!habitName.trim() || isSubmitting}
+            disabled={
+              !formData.title.trim() ||
+              formData.title.trim().length < 3 ||
+              isSubmitting
+            }
           >
             {isSubmitting ? "Saving..." : "Save Changes"}
           </Button>

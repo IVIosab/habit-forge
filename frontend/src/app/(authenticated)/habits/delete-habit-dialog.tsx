@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from "@/components/ui/alert-dialog"
-import type { Habit } from "./columns"
+import type { Habit } from "@/types"
 
 interface DeleteHabitDialogProps {
   habit: Habit
@@ -47,7 +47,7 @@ export function DeleteHabitDialog({
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete the habit
-            "{habit.name}" and remove all associated data.
+            "{habit.title}" and remove all associated data.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
