@@ -1,43 +1,59 @@
-import { db } from "../index.js";
-import { habits } from "../schema/api/habits.js";
-import { eq } from "drizzle-orm";
+import { db } from "../index.js"
+import { habits } from "../schema/api/habits.js"
+import { eq } from "drizzle-orm"
 
-// GET all habits for a user
-export async function getHabitsByUser(userId: string) {
-  return db.select().from(habits).where(eq(habits.user_id, userId));
+export async function dbGetUserHabits(userId: any) {
+  const res = await db.select().from(habits).where(eq(habits.user_id, userId))
+
+  return res
 }
 
-// POST create habit
-export async function createHabitForUser(userId: string, name: string) {
-  const newHabit = {
+export async function dbGetHabitById(habitId: string) {
+  const res = await db.select().from(habits).where(eq(habits.id, habitId))
+
+  return res[0]
+}
+
+export async function dbCreateUserHabit(
+  userId: any,
+  title: string,
+  description: any,
+  priority: any
+) {
+  const habit = {
     id: crypto.randomUUID(),
-    name,
     user_id: userId,
-    // created_at will default to current_timestamp
-  };
+    title,
+    ...(description && { description }),
+    ...(priority && { priority })
+  }
 
-  const result = await db.insert(habits).values(newHabit).returning();
-  return result[0];
+  const res = await db.insert(habits).values(habit).returning()
+
+  return res
 }
 
-// GET habit by ID
-export async function getHabit(habitId: string) {
-  const result = await db.select().from(habits).where(eq(habits.id, habitId));
-  return result[0];
-}
-
-// PUT update habit name
-export async function updateHabitById(habitId: string, name: string) {
-  const result = await db
+export async function dbUpdateHabitById(
+  habitId: string,
+  title: string,
+  description: any,
+  priority: any
+) {
+  const res = await db
     .update(habits)
-    .set({ name })
+    .set({
+      title,
+      ...(description && { description }),
+      ...(priority && { priority })
+    })
     .where(eq(habits.id, habitId))
-    .returning();
+    .returning()
 
-  return result[0];
+  return res
 }
 
-// DELETE habit
-export async function deleteHabitById(habitId: string) {
-  await db.delete(habits).where(eq(habits.id, habitId));
+export async function dbDeleteHabitById(habitId: string) {
+  const res = await db.delete(habits).where(eq(habits.id, habitId)).returning()
+
+  return res
 }

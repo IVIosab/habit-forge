@@ -1,5 +1,5 @@
-import morgan from "morgan";
+import morgan from "morgan"
 
-const format = ':method :url :status :res[content-length] - :response-time ms';
+const format = ":method :url :status :res[content-length] - :response-time ms"
 
-export const logger = morgan(format);
+export const logger = morgan(format)

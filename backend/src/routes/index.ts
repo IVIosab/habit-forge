@@ -1,12 +1,15 @@
-import express from "express";
-import statsRouter from "./stats.routes.js";
-import habitRouter from "./habit.routes.js";
-import entryRouter from "./entry.routes.js";
+import express from "express"
+import { authMiddleware } from "../middlewares/auth.middleware.js"
+import habitsRouter from "./habits.routes.js"
+import entriesRouter from "./entries.routes.js"
+import actionsRouter from "./actions.routes.js"
 
-const router = express.Router();
+const router = express.Router()
 
-router.use(statsRouter);
-router.use(habitRouter);
-router.use(entryRouter);
+router.use(authMiddleware)
 
-export default router;
+router.use("/habits", habitsRouter)
+router.use("/entries", entriesRouter)
+router.use("/actions", actionsRouter)
+
+export default router

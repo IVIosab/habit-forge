@@ -1,4 +1,4 @@
-import { habits } from "./habits";
-import { habit_entries } from "./habit_entries";
+import { habits } from "./habits"
+import { entries } from "./entries"
 
-export { habits, habit_entries };
+export { habits, entries }
