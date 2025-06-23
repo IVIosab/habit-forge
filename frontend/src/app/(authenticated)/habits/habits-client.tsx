@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { habitApi } from "@/lib/apiClient"
 import { createHabitColumns } from "./habit-columns"
 import { HabitDataTable } from "./habit-data-table"
+import { HabitSearch } from "./habit-search"
 import type { HabitWithCompletion } from "@/types"
 
 export function HabitsClient() {
@@ -14,6 +15,7 @@ export function HabitsClient() {
     []
   )
   const [isLoading, setIsLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
     fetchHabits()
@@ -111,20 +113,67 @@ export function HabitsClient() {
     )
   }
 
-  return (
-    <div className="space-y-8">
-      <HabitDataTable
-        columns={columns}
-        data={incompleteHabits}
-        onAddHabit={addHabit}
-        title="Today's Habits"
-      />
+  // Calculate total results for search feedback
+  const totalHabits = incompleteHabits.length + completeHabits.length
+  const filteredIncomplete = searchQuery
+    ? incompleteHabits.filter((habit) => {
+        const searchTerm = searchQuery.toLowerCase()
+        return (
+          habit.title.toLowerCase().includes(searchTerm) ||
+          (habit.description &&
+            habit.description.toLowerCase().includes(searchTerm)) ||
+          habit.priority.toLowerCase().includes(searchTerm)
+        )
+      })
+    : incompleteHabits
 
-      <HabitDataTable
-        columns={columns}
-        data={completeHabits}
-        title="Completed Habits"
-      />
+  const filteredComplete = searchQuery
+    ? completeHabits.filter((habit) => {
+        const searchTerm = searchQuery.toLowerCase()
+        return (
+          habit.title.toLowerCase().includes(searchTerm) ||
+          (habit.description &&
+            habit.description.toLowerCase().includes(searchTerm)) ||
+          habit.priority.toLowerCase().includes(searchTerm)
+        )
+      })
+    : completeHabits
+
+  const totalFiltered = filteredIncomplete.length + filteredComplete.length
+
+  return (
+    <div className="space-y-6">
+      {/* Search Bar */}
+      <div className="flex items-center justify-between">
+        <HabitSearch
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search habits by title, description, or priority..."
+        />
+        {searchQuery && (
+          <div className="text-sm text-muted-foreground">
+            {totalFiltered} of {totalHabits} habits match your search
+          </div>
+        )}
+      </div>
+
+      {/* Tables */}
+      <div className="space-y-8">
+        <HabitDataTable
+          columns={columns}
+          data={incompleteHabits}
+          onAddHabit={addHabit}
+          title="Today's Habits"
+          globalFilter={searchQuery}
+        />
+
+        <HabitDataTable
+          columns={columns}
+          data={completeHabits}
+          title="Completed Habits"
+          globalFilter={searchQuery}
+        />
+      </div>
     </div>
   )
 }
