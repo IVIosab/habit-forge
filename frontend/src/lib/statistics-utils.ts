@@ -1,91 +1,217 @@
-import {
-  format,
-  subDays,
-  subMonths,
-  subYears,
-  eachDayOfInterval,
-  startOfDay,
-  parseISO
-} from "date-fns"
-import type { ChartData, PieChartData, TimePeriod } from "@/types/Statistics"
+import { format, parseISO } from "date-fns"
+import type {
+  ChartData,
+  PieChartData,
+  AllHabitsPieData,
+  TimePeriod,
+  DayCompletion,
+  AllHabitsStats
+} from "@/types/Statistics"
 
-export function getDateRange(period: TimePeriod): { start: Date; end: Date } {
-  const end = new Date()
-  let start: Date
-
-  switch (period) {
-    case "week":
-      start = subDays(end, 7)
-      break
-    case "month":
-      start = subMonths(end, 1)
-      break
-    case "year":
-      start = subYears(end, 1)
-      break
-  }
-
-  return { start, end }
-}
-
-export function processCompletionData(
-  completionDates: string[],
+// Process single habit data
+export function processSingleHabitData(
+  data: DayCompletion[],
   period: TimePeriod
 ): ChartData[] {
-  const { start, end } = getDateRange(period)
+  return data.map((item) => ({
+    date: format(
+      parseISO(item.date),
+      period === "week" ? "EEE" : period === "month" ? "MMM dd" : "MMM yyyy"
+    ),
+    completions: item.completed ? 1 : 0
+  }))
+}
 
-  // Parse completion dates
-  const completions = completionDates.map((date) => startOfDay(parseISO(date)))
+// Process all habits data for bar/line charts
+export function processAllHabitsChartData(
+  data: AllHabitsStats,
+  period: TimePeriod
+): ChartData[] {
+  const allDates = new Set<string>()
 
-  // Get all days in the range
-  const allDays = eachDayOfInterval({ start, end })
+  // Collect all unique dates
+  Object.values(data).forEach((habitData) => {
+    habitData.forEach((day) => allDates.add(day.date))
+  })
 
-  // Count completions per day
-  const dailyCompletions = allDays.map((day) => {
-    const dayStart = startOfDay(day)
-    const count = completions.filter(
-      (completion) => completion.getTime() === dayStart.getTime()
-    ).length
+  const sortedDates = Array.from(allDates).sort()
+
+  return sortedDates.map((date) => {
+    let totalCompletions = 0
+
+    Object.values(data).forEach((habitData) => {
+      const dayData = habitData.find((day) => day.date === date)
+      if (dayData?.completed) {
+        totalCompletions++
+      }
+    })
 
     return {
       date: format(
-        day,
+        parseISO(date),
         period === "week" ? "EEE" : period === "month" ? "MMM dd" : "MMM yyyy"
       ),
-      completions: count
+      completions: totalCompletions
     }
   })
-
-  return dailyCompletions
 }
 
-export function processPieChartData(
-  completionDates: string[],
-  period: TimePeriod
+// Process single habit pie chart data
+export function processSingleHabitPieData(
+  data: DayCompletion[]
 ): PieChartData[] {
-  const { start, end } = getDateRange(period)
-  const totalDays = eachDayOfInterval({ start, end }).length
-
-  // Parse completion dates and filter for the period
-  const completions = completionDates
-    .map((date) => parseISO(date))
-    .filter((date) => date >= start && date <= end)
-
-  const completedDays = new Set(
-    completions.map((date) => format(startOfDay(date), "yyyy-MM-dd"))
-  ).size
-  const incompleteDays = totalDays - completedDays
+  const completed = data.filter((item) => item.completed).length
+  const incomplete = data.length - completed
 
   return [
     {
       name: "Completed",
-      value: completedDays,
+      value: completed,
       fill: "hsl(var(--chart-1))"
     },
     {
       name: "Incomplete",
-      value: incompleteDays,
+      value: incomplete,
       fill: "hsl(var(--chart-2))"
     }
   ]
+}
+
+// Process all habits pie chart data
+export function processAllHabitsPieData(
+  data: AllHabitsStats
+): AllHabitsPieData[] {
+  const colors = [
+    "hsl(var(--chart-1))",
+    "hsl(var(--chart-2))",
+    "hsl(var(--chart-3))",
+    "hsl(var(--chart-4))",
+    "hsl(var(--chart-5))"
+  ]
+
+  return Object.entries(data).map(([habitName, habitData], index) => {
+    const completedCount = habitData.filter((day) => day.completed).length
+
+    return {
+      name: habitName,
+      value: completedCount,
+      fill: colors[index % colors.length]
+    }
+  })
+}
+
+// Calculate current streak for single habit
+export function calculateSingleHabitStreak(data: DayCompletion[]): number {
+  if (data.length === 0) return 0
+
+  const sortedData = data.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+
+  let streak = 0
+  for (const day of sortedData) {
+    if (day.completed) {
+      streak++
+    } else {
+      break
+    }
+  }
+
+  return streak
+}
+
+// Calculate current streak for all habits (consecutive days where ALL habits were completed)
+export function calculateAllHabitsCurrentStreak(data: AllHabitsStats): number {
+  const habitNames = Object.keys(data)
+  if (habitNames.length === 0) return 0
+
+  // Get all dates and sort them descending
+  const allDates = new Set<string>()
+  Object.values(data).forEach((habitData) => {
+    habitData.forEach((day) => allDates.add(day.date))
+  })
+
+  const sortedDates = Array.from(allDates).sort(
+    (a, b) => new Date(b).getTime() - new Date(a).getTime()
+  )
+
+  let streak = 0
+  for (const date of sortedDates) {
+    // Check if ALL habits were completed on this date
+    const allCompleted = habitNames.every((habitName) => {
+      const habitData = data[habitName]
+      const dayData = habitData.find((day) => day.date === date)
+      return dayData?.completed === true
+    })
+
+    if (allCompleted) {
+      streak++
+    } else {
+      break
+    }
+  }
+
+  return streak
+}
+
+// Calculate longest streak for single habit
+export function calculateSingleHabitLongestStreak(
+  data: DayCompletion[]
+): number {
+  if (data.length === 0) return 0
+
+  const sortedData = data.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  )
+
+  let maxStreak = 0
+  let currentStreak = 0
+
+  for (const day of sortedData) {
+    if (day.completed) {
+      currentStreak++
+      maxStreak = Math.max(maxStreak, currentStreak)
+    } else {
+      currentStreak = 0
+    }
+  }
+
+  return maxStreak
+}
+
+// Calculate longest streak for all habits (consecutive days where ALL habits were completed)
+export function calculateAllHabitsLongestStreak(data: AllHabitsStats): number {
+  const habitNames = Object.keys(data)
+  if (habitNames.length === 0) return 0
+
+  // Get all dates and sort them ascending
+  const allDates = new Set<string>()
+  Object.values(data).forEach((habitData) => {
+    habitData.forEach((day) => allDates.add(day.date))
+  })
+
+  const sortedDates = Array.from(allDates).sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime()
+  )
+
+  let maxStreak = 0
+  let currentStreak = 0
+
+  for (const date of sortedDates) {
+    // Check if ALL habits were completed on this date
+    const allCompleted = habitNames.every((habitName) => {
+      const habitData = data[habitName]
+      const dayData = habitData.find((day) => day.date === date)
+      return dayData?.completed === true
+    })
+
+    if (allCompleted) {
+      currentStreak++
+      maxStreak = Math.max(maxStreak, currentStreak)
+    } else {
+      currentStreak = 0
+    }
+  }
+
+  return maxStreak
 }

@@ -1,6 +1,10 @@
-export interface HabitStats {
-  habitId: string
-  completionDates: string[]
+export interface DayCompletion {
+  date: string
+  completed: boolean
+}
+
+export interface AllHabitsStats {
+  [habitName: string]: DayCompletion[]
 }
 
 export interface ChartData {
@@ -14,4 +18,17 @@ export interface PieChartData {
   fill: string
 }
 
+export interface AllHabitsPieData {
+  name: string
+  value: number
+  fill: string
+}
+
 export type TimePeriod = "week" | "month" | "year"
+
+export interface StatsData {
+  isAllHabits: boolean
+  singleHabitData?: DayCompletion[]
+  allHabitsData?: AllHabitsStats
+  habitName?: string
+}
