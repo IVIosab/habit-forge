@@ -42,7 +42,7 @@ export function StatsCharts({ statsData, timePeriod }: StatsChartsProps) {
   const chartConfig = {
     completions: {
       label: "Completions",
-      color: "hsl(var(--chart-1))"
+      color: "hsl(0, 0%, 20%)" // Dark grey for consistency
     }
   }
 
@@ -87,13 +87,15 @@ export function StatsCharts({ statsData, timePeriod }: StatsChartsProps) {
   const getChartDescription = (type: "bar" | "line" | "pie") => {
     const period = timePeriod
     const baseDesc = statsData.isAllHabits
-      ? "all habits"
+      ? "perfect days"
       : statsData.habitName || "habit"
 
     switch (type) {
       case "bar":
       case "line":
-        return `${statsData.isAllHabits ? "Total" : baseDesc} completions over the past ${period}`
+        return statsData.isAllHabits
+          ? `Days with all habits completed over the past ${period}`
+          : `${baseDesc} completions over the past ${period}`
       case "pie":
         return statsData.isAllHabits
           ? `Total completions for each habit over the past ${period}`

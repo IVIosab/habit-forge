@@ -8,6 +8,16 @@ import type {
   AllHabitsStats
 } from "@/types/Statistics"
 
+// Greyscale color palette for minimalistic design
+const GREYSCALE_COLORS = [
+  "hsl(0, 0%, 20%)", // Dark grey
+  "hsl(0, 0%, 35%)", // Medium dark grey
+  "hsl(0, 0%, 50%)", // Medium grey
+  "hsl(0, 0%, 65%)", // Medium light grey
+  "hsl(0, 0%, 80%)", // Light grey
+  "hsl(0, 0%, 90%)" // Very light grey
+]
+
 // Process single habit data
 export function processSingleHabitData(
   data: DayCompletion[],
@@ -27,6 +37,9 @@ export function processAllHabitsChartData(
   data: AllHabitsStats,
   period: TimePeriod
 ): ChartData[] {
+  const habitNames = Object.keys(data)
+  if (habitNames.length === 0) return []
+
   const allDates = new Set<string>()
 
   // Collect all unique dates
@@ -37,13 +50,11 @@ export function processAllHabitsChartData(
   const sortedDates = Array.from(allDates).sort()
 
   return sortedDates.map((date) => {
-    let totalCompletions = 0
-
-    Object.values(data).forEach((habitData) => {
+    // Check if ALL habits were completed on this date
+    const allCompleted = habitNames.every((habitName) => {
+      const habitData = data[habitName]
       const dayData = habitData.find((day) => day.date === date)
-      if (dayData?.completed) {
-        totalCompletions++
-      }
+      return dayData?.completed === true
     })
 
     return {
@@ -51,12 +62,12 @@ export function processAllHabitsChartData(
         parseISO(date),
         period === "week" ? "EEE" : period === "month" ? "MMM dd" : "MMM yyyy"
       ),
-      completions: totalCompletions
+      completions: allCompleted ? 1 : 0
     }
   })
 }
 
-// Process single habit pie chart data
+// Process single habit pie chart data with greyscale colors
 export function processSingleHabitPieData(
   data: DayCompletion[]
 ): PieChartData[] {
@@ -67,35 +78,27 @@ export function processSingleHabitPieData(
     {
       name: "Completed",
       value: completed,
-      fill: "hsl(var(--chart-1))"
+      fill: "hsl(0, 0%, 20%)" // Dark grey for completed
     },
     {
       name: "Incomplete",
       value: incomplete,
-      fill: "hsl(var(--chart-2))"
+      fill: "hsl(0, 0%, 80%)" // Light grey for incomplete
     }
   ]
 }
 
-// Process all habits pie chart data
+// Process all habits pie chart data with different greyscale colors for each habit
 export function processAllHabitsPieData(
   data: AllHabitsStats
 ): AllHabitsPieData[] {
-  const colors = [
-    "hsl(var(--chart-1))",
-    "hsl(var(--chart-2))",
-    "hsl(var(--chart-3))",
-    "hsl(var(--chart-4))",
-    "hsl(var(--chart-5))"
-  ]
-
   return Object.entries(data).map(([habitName, habitData], index) => {
     const completedCount = habitData.filter((day) => day.completed).length
 
     return {
       name: habitName,
       value: completedCount,
-      fill: colors[index % colors.length]
+      fill: GREYSCALE_COLORS[index % GREYSCALE_COLORS.length]
     }
   })
 }
@@ -214,4 +217,32 @@ export function calculateAllHabitsLongestStreak(data: AllHabitsStats): number {
   }
 
   return maxStreak
+}
+
+// Calculate total days where ALL habits were completed (for All Habits view)
+export function calculateAllHabitsCompletedDays(data: AllHabitsStats): number {
+  const habitNames = Object.keys(data)
+  if (habitNames.length === 0) return 0
+
+  // Get all dates
+  const allDates = new Set<string>()
+  Object.values(data).forEach((habitData) => {
+    habitData.forEach((day) => allDates.add(day.date))
+  })
+
+  let completedDays = 0
+  for (const date of allDates) {
+    // Check if ALL habits were completed on this date
+    const allCompleted = habitNames.every((habitName) => {
+      const habitData = data[habitName]
+      const dayData = habitData.find((day) => day.date === date)
+      return dayData?.completed === true
+    })
+
+    if (allCompleted) {
+      completedDays++
+    }
+  }
+
+  return completedDays
 }
