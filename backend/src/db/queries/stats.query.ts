@@ -44,17 +44,49 @@ export async function dbGetStatsForHabit(period: string, habitId: string) {
 
   // Step 3: Generate list of last N days
   const today = new Date()
-  const startDate = subDays(today, days - 1) // inclusive range
+  const startDate = subDays(today, days - 1)
   const allDates = eachDayOfInterval({ start: startDate, end: today })
 
-  // Step 4: Return completion status per day
-  return allDates.map((date) => {
+  // Step 4: Compute streaks and completion stats
+  let totalCompletions = 0
+  let longestStreak = 0
+  let currentStreak = 0
+  let streakCounter = 0
+
+  for (let i = allDates.length - 1; i >= 0; i--) {
+    const dateStr = format(allDates[i], "yyyy-MM-dd")
+    const completed = completedDates.has(dateStr)
+
+    if (completed) {
+      totalCompletions++
+      streakCounter++
+
+      // Update current streak if we're still at the end
+      if (i === allDates.length - 1 || currentStreak === streakCounter - 1) {
+        currentStreak = streakCounter
+      }
+    } else {
+      streakCounter = 0
+    }
+
+    longestStreak = Math.max(longestStreak, streakCounter)
+  }
+
+  // Step 5: Build daily completion map
+  const dailyStatus = allDates.map((date) => {
     const dateStr = format(date, "yyyy-MM-dd")
     return {
       date: dateStr,
       completed: completedDates.has(dateStr)
     }
   })
+
+  return {
+    dailyStatus,
+    totalCompletions,
+    longestStreak,
+    currentStreak
+  }
 }
 
 export async function dbGetStatsForUser(period: string, userId: string) {
@@ -63,6 +95,7 @@ export async function dbGetStatsForUser(period: string, userId: string) {
   // Step 1: Fetch entries joined with habits (innerJoin keeps only entries that exist)
   const rows = await db
     .select({
+      habitId: habits.id,
       habitTitle: habits.title,
       completionDate: entries.completion_date
     })
@@ -72,32 +105,78 @@ export async function dbGetStatsForUser(period: string, userId: string) {
       and(eq(habits.user_id, userId), gte(entries.completion_date, sqlExpr))
     )
 
-  // Step 2: Group completion dates by habit name
+  // Step 2: Get list of all habits for this user
+  const allHabits = await db
+    .select({ id: habits.id, title: habits.title })
+    .from(habits)
+    .where(eq(habits.user_id, userId))
+
+  const habitIds = allHabits.map((h) => h.id)
+  const habitTitles = new Map(allHabits.map((h) => [h.id, h.title]))
+
+  // Step 3: Group completion dates by habit ID
   const grouped: Map<string, Set<string>> = new Map()
 
-  for (const { habitTitle, completionDate } of rows) {
-    const dateStr = completionDate.slice(0, 10) // 'YYYY-MM-DD'
-    if (!grouped.has(habitTitle)) {
-      grouped.set(habitTitle, new Set())
+  for (const { habitId, completionDate } of rows) {
+    const dateStr = completionDate.slice(0, 10)
+    if (!grouped.has(habitId)) {
+      grouped.set(habitId, new Set())
     }
-    grouped.get(habitTitle)!.add(dateStr)
+    grouped.get(habitId)!.add(dateStr)
   }
 
-  // Step 3: Generate the list of dates for the period
+  // Step 4: Generate the list of dates in the period
   const today = new Date()
   const startDate = subDays(today, days - 1)
   const allDates = eachDayOfInterval({ start: startDate, end: today })
   const formattedDates = allDates.map((d) => format(d, "yyyy-MM-dd"))
 
-  // Step 4: Build final output
+  // Step 5: Build per-habit status map
   const result: Record<string, { date: string; completed: boolean }[]> = {}
 
-  for (const [habitName, completedSet] of grouped.entries()) {
-    result[habitName] = formattedDates.map((date) => ({
+  for (const habitId of habitIds) {
+    const title = habitTitles.get(habitId)!
+    const completedSet = grouped.get(habitId) || new Set()
+    result[title] = formattedDates.map((date) => ({
       date,
       completed: completedSet.has(date)
     }))
   }
 
-  return result
+  // Step 6: Calculate perfect days and streaks
+  let perfectDays = 0
+  let longestStreak = 0
+  let currentStreak = 0
+  let streakCounter = 0
+
+  for (let i = formattedDates.length - 1; i >= 0; i--) {
+    const date = formattedDates[i]
+
+    const isPerfect = habitIds.every((habitId) =>
+      grouped.get(habitId)?.has(date)
+    )
+
+    if (isPerfect) {
+      perfectDays++
+      streakCounter++
+
+      if (
+        i === formattedDates.length - 1 ||
+        currentStreak === streakCounter - 1
+      ) {
+        currentStreak = streakCounter
+      }
+    } else {
+      streakCounter = 0
+    }
+
+    longestStreak = Math.max(longestStreak, streakCounter)
+  }
+
+  return {
+    habits: result,
+    perfectDays,
+    longestStreak,
+    currentStreak
+  }
 }
