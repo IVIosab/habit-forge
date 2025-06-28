@@ -2,13 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { StatsData, TimePeriod } from "@/types/Statistics"
-import {
-  calculateSingleHabitStreak,
-  calculateSingleHabitLongestStreak,
-  calculateAllHabitsCurrentStreak,
-  calculateAllHabitsLongestStreak,
-  calculateAllHabitsCompletedDays
-} from "@/lib/statistics-utils"
 
 interface StatsSummaryProps {
   statsData: StatsData
@@ -18,29 +11,27 @@ interface StatsSummaryProps {
 export function StatsSummary({ statsData, timePeriod }: StatsSummaryProps) {
   const getTotalCompletions = () => {
     if (statsData.isAllHabits && statsData.allHabitsData) {
-      // For All Habits: count days where ALL habits were completed
-      return calculateAllHabitsCompletedDays(statsData.allHabitsData)
+      return statsData.allHabitsData.perfectDays
     } else if (statsData.singleHabitData) {
-      // For single habit: count completed days
-      return statsData.singleHabitData.filter((day) => day.completed).length
+      return statsData.singleHabitData.totalCompletions
     }
     return 0
   }
 
   const getCurrentStreak = () => {
     if (statsData.isAllHabits && statsData.allHabitsData) {
-      return calculateAllHabitsCurrentStreak(statsData.allHabitsData)
+      return statsData.allHabitsData.currentStreak
     } else if (statsData.singleHabitData) {
-      return calculateSingleHabitStreak(statsData.singleHabitData)
+      return statsData.singleHabitData.currentStreak
     }
     return 0
   }
 
   const getLongestStreak = () => {
     if (statsData.isAllHabits && statsData.allHabitsData) {
-      return calculateAllHabitsLongestStreak(statsData.allHabitsData)
+      return statsData.allHabitsData.longestStreak
     } else if (statsData.singleHabitData) {
-      return calculateSingleHabitLongestStreak(statsData.singleHabitData)
+      return statsData.singleHabitData.longestStreak
     }
     return 0
   }

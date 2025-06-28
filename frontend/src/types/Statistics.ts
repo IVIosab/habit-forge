@@ -3,8 +3,20 @@ export interface DayCompletion {
   completed: boolean
 }
 
-export interface AllHabitsStats {
-  [habitName: string]: DayCompletion[]
+export interface SingleHabitStatsResponse {
+  dailyStatus: DayCompletion[]
+  totalCompletions: number
+  longestStreak: number
+  currentStreak: number
+}
+
+export interface AllHabitsStatsResponse {
+  habits: {
+    [habitName: string]: DayCompletion[]
+  }
+  perfectDays: number
+  longestStreak: number
+  currentStreak: number
 }
 
 export interface ChartData {
@@ -28,7 +40,7 @@ export type TimePeriod = "week" | "month" | "year"
 
 export interface StatsData {
   isAllHabits: boolean
-  singleHabitData?: DayCompletion[]
-  allHabitsData?: AllHabitsStats
+  singleHabitData?: SingleHabitStatsResponse
+  allHabitsData?: AllHabitsStatsResponse
   habitName?: string
 }

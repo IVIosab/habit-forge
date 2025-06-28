@@ -1,6 +1,6 @@
 import type {
-  DayCompletion,
-  AllHabitsStats,
+  SingleHabitStatsResponse,
+  AllHabitsStatsResponse,
   TimePeriod
 } from "@/types/Statistics"
 
@@ -10,7 +10,7 @@ export const statisticsApi = {
   async getHabitStats(
     period: TimePeriod,
     habitId: string
-  ): Promise<DayCompletion[]> {
+  ): Promise<SingleHabitStatsResponse> {
     const res = await fetch(`${API_BASE}/stats/${period}/${habitId}`, {
       credentials: "include",
       cache: "no-store"
@@ -19,7 +19,7 @@ export const statisticsApi = {
     return res.json()
   },
 
-  async getAllHabitsStats(period: TimePeriod): Promise<AllHabitsStats> {
+  async getAllHabitsStats(period: TimePeriod): Promise<AllHabitsStatsResponse> {
     const res = await fetch(`${API_BASE}/stats/${period}`, {
       credentials: "include",
       cache: "no-store"
