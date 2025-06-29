@@ -45,27 +45,28 @@ Welcome! Follow the steps below to get everything up and running.
    cd frontend/
    ```
 4. Follow the dedicated instructions:
-   - [Front-end README]()
-   - [Back-end README]()
+   - [Front-end README](https://github.com/IVIosab/habit-forge/blob/main/frontend/README.md)
+   - [Back-end README](https://github.com/IVIosab/habit-forge/blob/main/backend/README.md)
 
 ## Functional Features
 
 ### 1. User Authentication
 
 - Secure login and registration with email and password.
-- OAuth integration for third-party logins (Google, Facebook). // TODO
+<!-- - OAuth integration for third-party logins (Google, Facebook). // TODO -->
 
 ### 2. Dynamic Content Management
 
 - View daily habits
 - Ability to create, update, and delete habits.
 
-### 3. Analytics Dashboard //TODO
+### 3. Analytics Dashboard
 
 - Real-time statistics and metrics for user activity.
 - Visual graphs and charts for easy data interpretation.
 
 ## Acknowledgments
 
-- TODO
+<!-- - TODO -->
+
 - [Readme Forge](https://readme-forge.github.io) - Creating README.md
