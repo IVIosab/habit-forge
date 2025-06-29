@@ -1,0 +1,590 @@
+openapi: 3.0.4
+info:
+  title: Habit Forge API
+  description: |-
+    The Habit Forge API powers a modern habit-tracking application, designed to help users build routines, track completions, and visualize progress over time.
+
+    This API allows users to:
+    - Create and manage personal habits
+    - Record daily completions
+    - View completion stats, streaks, and perfect-day summaries
+    - Distinguish between completed and missed habits for any given day
+
+    Built with a focus on simplicity, performance, and transparency. Contributions and suggestions are welcome!
+
+    Useful links:
+    - [GitHub Repository](https://github.com/IVIosab/habit-forge/blob/main/backend)
+
+  version: 0.0.1
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT #TODO link github repo license
+# servers:
+#   - url: https://petstore3.swagger.io/api/v3
+# tags:
+#   - name: pet
+#     description: Everything about your Pets
+#     externalDocs:
+#       description: Find out more
+#       url: https://swagger.io
+#   - name: store
+#     description: Access to Petstore orders
+#     externalDocs:
+#       description: Find out more about our store
+#       url: https://swagger.io
+#   - name: user
+#     description: Operations about user
+paths:
+  /habits:
+    get:
+      summary: Get all habits for the authenticated user
+      tags: [Habits]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: A list of habits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Habit"
+        "401":
+          description: Unauthorized
+
+    post:
+      summary: Create a new habit for the authenticated user
+      tags: [Habits]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                  example: "Workout"
+                description:
+                  type: string
+                  example: "Morning session"
+                priority:
+                  type: string
+                  enum: [none, low, medium, high]
+                  example: "medium"
+      responses:
+        "201":
+          description: Habit created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+        "400":
+          description: Missing title or invalid data
+        "401":
+          description: Unauthorized
+
+  /habits/{id}:
+    get:
+      summary: Get a specific habit by ID
+      tags: [Habits]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Habit found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+        "404":
+          description: Habit not found or unauthorized
+        "401":
+          description: Unauthorized
+
+    put:
+      summary: Update a specific habit by ID
+      tags: [Habits]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                  example: "Workout"
+                description:
+                  type: string
+                  example: "Updated description"
+                priority:
+                  type: string
+                  enum: [none, low, medium, high]
+                  example: "high"
+      responses:
+        "201":
+          description: Habit updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+        "400":
+          description: Missing title or invalid data
+        "404":
+          description: Habit not found or unauthorized
+        "401":
+          description: Unauthorized
+
+    delete:
+      summary: Delete a habit by ID
+      tags: [Habits]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Habit deleted
+        "404":
+          description: Habit not found or unauthorized
+        "401":
+          description: Unauthorized
+  /entries:
+    get:
+      summary: Get all habit entries for the authenticated user
+      tags: [Entries]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: A list of habit entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Entry"
+        "401":
+          description: Unauthorized
+
+    post:
+      summary: Create a new habit entry for the authenticated user
+      tags: [Entries]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [habit_id]
+              properties:
+                habit_id:
+                  type: string
+                  example: "habit_abc123"
+      responses:
+        "201":
+          description: Entry created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Entry"
+        "400":
+          description: habit_id is required
+        "401":
+          description: Unauthorized
+
+  /entries/{entryId}:
+    get:
+      summary: Get a specific habit entry by ID
+      tags: [Entries]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Entry found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Entry"
+        "404":
+          description: Entry not found or unauthorized
+        "401":
+          description: Unauthorized
+
+    delete:
+      summary: Delete a habit entry by ID
+      tags: [Entries]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Entry deleted
+        "404":
+          description: Entry not found or unauthorized
+        "401":
+          description: Unauthorized
+  /actions/incomplete:
+    get:
+      summary: Get today's incomplete habits for the authenticated user
+      tags: [Actions]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: A list of habits not completed today
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Habit"
+        "401":
+          description: Unauthorized
+
+  /actions/complete:
+    get:
+      summary: Get today's completed habits for the authenticated user
+      tags: [Actions]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: A list of habits completed today
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Habit"
+        "401":
+          description: Unauthorized
+
+  /stats/{period}:
+    get:
+      summary: Get daily stats for all habits in a period
+      tags: [Stats]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [week, month, year]
+            example: week
+      responses:
+        "200":
+          description: Stats for user’s habits in the given period
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  habits:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/DateCompletion"
+                  perfectDays:
+                    type: integer
+                    example: 5
+                  longestStreak:
+                    type: integer
+                    example: 3
+                  currentStreak:
+                    type: integer
+                    example: 2
+        "400":
+          description: Invalid period
+        "401":
+          description: Unauthorized
+        "404":
+          description: User not found
+
+  /stats/{period}/{habitId}:
+    get:
+      summary: Get daily stats for a specific habit in a period
+      tags: [Stats]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [week, month, year]
+            example: month
+        - name: habitId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "habit_abc123"
+      responses:
+        "200":
+          description: Stats for the given habit in the given period
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dailyStatus:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DateCompletion"
+                  totalCompletions:
+                    type: integer
+                    example: 17
+                  longestStreak:
+                    type: integer
+                    example: 6
+                  currentStreak:
+                    type: integer
+                    example: 2
+        "400":
+          description: Invalid period
+        "401":
+          description: Unauthorized
+        "404":
+          description: Habit not found or unauthorized
+
+components:
+  schemas:
+    Habit:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "habit_abc123"
+        title:
+          type: string
+          example: "Read 20 pages"
+        description:
+          type: string
+          nullable: true
+          example: "Evening reading routine"
+        priority:
+          type: string
+          enum: [none, low, medium, high]
+          example: "none"
+        creation_date:
+          type: string
+          format: date-time
+          example: "2025-06-28T12:00:00Z"
+        user_id:
+          type: string
+          example: "user_123"
+      required: [id, title, priority, creation_date, user_id]
+
+    Entry:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "entry_abc123"
+        completion_date:
+          type: string
+          format: date-time
+          example: "2025-06-28T20:15:00Z"
+        user_id:
+          type: string
+          example: "user_123"
+        habit_id:
+          type: string
+          example: "habit_abc123"
+      required: [id, completion_date, user_id, habit_id]
+
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "acc_123"
+        accountId:
+          type: string
+          example: "github_998877"
+        providerId:
+          type: string
+          example: "github"
+        userId:
+          type: string
+          example: "user_123"
+        accessToken:
+          type: string
+          nullable: true
+          example: "ya29.a0AfH6..."
+        refreshToken:
+          type: string
+          nullable: true
+          example: "1//0gL..."
+        idToken:
+          type: string
+          nullable: true
+          example: "eyJhbGciOiJIUzI1NiIsInR..."
+        accessTokenExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        refreshTokenExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        scope:
+          type: string
+          nullable: true
+          example: "read:user"
+        password:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, accountId, providerId, userId, createdAt, updatedAt]
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "sess_abc123"
+        expiresAt:
+          type: string
+          format: date-time
+        token:
+          type: string
+          example: "session_token_xyz"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        ipAddress:
+          type: string
+          nullable: true
+          example: "192.168.1.1"
+        userAgent:
+          type: string
+          nullable: true
+          example: "Mozilla/5.0"
+        userId:
+          type: string
+          example: "user_123"
+      required: [id, expiresAt, token, createdAt, updatedAt, userId]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "user_123"
+        name:
+          type: string
+          example: "Mosab Mohamed"
+        email:
+          type: string
+          format: email
+          example: "mosab@example.com"
+        emailVerified:
+          type: boolean
+          example: false
+        image:
+          type: string
+          nullable: true
+          example: "https://example.com/avatar.png"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, name, email, emailVerified, createdAt, updatedAt]
+
+    Verification:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "verify_123"
+        identifier:
+          type: string
+          example: "mosab@example.com"
+        value:
+          type: string
+          example: "123456"
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, identifier, value, expiresAt]
+
+    DateCompletion:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2025-06-22"
+        completed:
+          type: boolean
+          example: true
+      required: [date, completed]
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
