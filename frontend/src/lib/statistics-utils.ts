@@ -1,4 +1,4 @@
-import { format, parseISO } from "date-fns"
+import { format, parseISO, startOfWeek, startOfMonth } from "date-fns"
 import type {
   ChartData,
   PieChartData,
@@ -23,13 +23,55 @@ export function processSingleHabitData(
   data: SingleHabitStatsResponse,
   period: TimePeriod
 ): ChartData[] {
-  return data.dailyStatus.map((item) => ({
-    date: format(
-      parseISO(item.date),
-      period === "week" ? "EEE" : period === "month" ? "MMM dd" : "MMM yyyy"
-    ),
-    completions: item.completed ? 1 : 0
-  }))
+  if (period === "week") {
+    // Show individual days for week view
+    return data.dailyStatus.map((item) => ({
+      date: format(parseISO(item.date), "EEE"),
+      completions: item.completed ? 1 : 0
+    }))
+  } else if (period === "month") {
+    // Group by weeks for month view
+    const weeklyData = new Map<string, number>()
+
+    data.dailyStatus.forEach((item) => {
+      const weekStart = startOfWeek(parseISO(item.date))
+      const weekKey = format(weekStart, "MMM dd")
+
+      if (!weeklyData.has(weekKey)) {
+        weeklyData.set(weekKey, 0)
+      }
+
+      if (item.completed) {
+        weeklyData.set(weekKey, weeklyData.get(weekKey)! + 1)
+      }
+    })
+
+    return Array.from(weeklyData.entries()).map(([date, completions]) => ({
+      date,
+      completions
+    }))
+  } else {
+    // Group by months for year view
+    const monthlyData = new Map<string, number>()
+
+    data.dailyStatus.forEach((item) => {
+      const monthStart = startOfMonth(parseISO(item.date))
+      const monthKey = format(monthStart, "MMM yyyy")
+
+      if (!monthlyData.has(monthKey)) {
+        monthlyData.set(monthKey, 0)
+      }
+
+      if (item.completed) {
+        monthlyData.set(monthKey, monthlyData.get(monthKey)! + 1)
+      }
+    })
+
+    return Array.from(monthlyData.entries()).map(([date, completions]) => ({
+      date,
+      completions
+    }))
+  }
 }
 
 // Process all habits data for bar/line charts
@@ -40,31 +82,89 @@ export function processAllHabitsChartData(
   const habitNames = Object.keys(data.habits)
   if (habitNames.length === 0) return []
 
-  const allDates = new Set<string>()
-
   // Collect all unique dates
+  const allDates = new Set<string>()
   Object.values(data.habits).forEach((habitData) => {
     habitData.forEach((day) => allDates.add(day.date))
   })
 
   const sortedDates = Array.from(allDates).sort()
 
-  return sortedDates.map((date) => {
-    // Check if ALL habits were completed on this date
-    const allCompleted = habitNames.every((habitName) => {
-      const habitData = data.habits[habitName]
-      const dayData = habitData.find((day) => day.date === date)
-      return dayData?.completed === true
+  if (period === "week") {
+    // Show individual days for week view - count completed habits per day
+    return sortedDates.map((date) => {
+      let completedHabits = 0
+
+      habitNames.forEach((habitName) => {
+        const habitData = data.habits[habitName]
+        const dayData = habitData.find((day) => day.date === date)
+        if (dayData?.completed) {
+          completedHabits++
+        }
+      })
+
+      return {
+        date: format(parseISO(date), "EEE"),
+        completions: completedHabits
+      }
+    })
+  } else if (period === "month") {
+    // Group by weeks for month view
+    const weeklyData = new Map<string, number>()
+
+    sortedDates.forEach((date) => {
+      const weekStart = startOfWeek(parseISO(date))
+      const weekKey = format(weekStart, "MMM dd")
+
+      if (!weeklyData.has(weekKey)) {
+        weeklyData.set(weekKey, 0)
+      }
+
+      let completedHabits = 0
+      habitNames.forEach((habitName) => {
+        const habitData = data.habits[habitName]
+        const dayData = habitData.find((day) => day.date === date)
+        if (dayData?.completed) {
+          completedHabits++
+        }
+      })
+
+      weeklyData.set(weekKey, weeklyData.get(weekKey)! + completedHabits)
     })
 
-    return {
-      date: format(
-        parseISO(date),
-        period === "week" ? "EEE" : period === "month" ? "MMM dd" : "MMM yyyy"
-      ),
-      completions: allCompleted ? 1 : 0
-    }
-  })
+    return Array.from(weeklyData.entries()).map(([date, completions]) => ({
+      date,
+      completions
+    }))
+  } else {
+    // Group by months for year view
+    const monthlyData = new Map<string, number>()
+
+    sortedDates.forEach((date) => {
+      const monthStart = startOfMonth(parseISO(date))
+      const monthKey = format(monthStart, "MMM yyyy")
+
+      if (!monthlyData.has(monthKey)) {
+        monthlyData.set(monthKey, 0)
+      }
+
+      let completedHabits = 0
+      habitNames.forEach((habitName) => {
+        const habitData = data.habits[habitName]
+        const dayData = habitData.find((day) => day.date === date)
+        if (dayData?.completed) {
+          completedHabits++
+        }
+      })
+
+      monthlyData.set(monthKey, monthlyData.get(monthKey)! + completedHabits)
+    })
+
+    return Array.from(monthlyData.entries()).map(([date, completions]) => ({
+      date,
+      completions
+    }))
+  }
 }
 
 // Process single habit pie chart data with greyscale colors

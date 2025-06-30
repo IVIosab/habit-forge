@@ -85,21 +85,47 @@ export function StatsCharts({ statsData, timePeriod }: StatsChartsProps) {
   }
 
   const getChartDescription = (type: "bar" | "line" | "pie") => {
-    const period = timePeriod
-    const baseDesc = statsData.isAllHabits
-      ? "perfect days"
-      : statsData.habitName || "habit"
+    const getTimeUnit = () => {
+      switch (timePeriod) {
+        case "week":
+          return "daily"
+        case "month":
+          return "weekly"
+        case "year":
+          return "monthly"
+      }
+    }
+
+    const getAggregationDescription = () => {
+      if (statsData.isAllHabits) {
+        switch (timePeriod) {
+          case "week":
+            return "Number of habits completed each day"
+          case "month":
+            return "Total habits completed each week"
+          case "year":
+            return "Total habits completed each month"
+        }
+      } else {
+        switch (timePeriod) {
+          case "week":
+            return `${statsData.habitName || "Habit"} completions each day`
+          case "month":
+            return `${statsData.habitName || "Habit"} completions each week`
+          case "year":
+            return `${statsData.habitName || "Habit"} completions each month`
+        }
+      }
+    }
 
     switch (type) {
       case "bar":
       case "line":
-        return statsData.isAllHabits
-          ? `Days with all habits completed over the past ${period}`
-          : `${baseDesc} completions over the past ${period}`
+        return getAggregationDescription()
       case "pie":
         return statsData.isAllHabits
-          ? `Total completions for each habit over the past ${period}`
-          : `Days completed vs incomplete for ${baseDesc} over the past ${period}`
+          ? `Total completions for each habit over the past ${timePeriod}`
+          : `Days completed vs incomplete for ${statsData.habitName || "habit"} over the past ${timePeriod}`
     }
   }
 
