@@ -46,12 +46,17 @@ To install the project, follow these steps:
    ```
 3. Prepare db:
    ```bash
-   npm run prep
+   npm run prep-db
    ```
-4. Run it:
+4. Run the api:
    ```bash
    npm run dev
    ```
+5. Run the seeding script (if needed):
+   ```bash
+   npm run seed-db
+   ```
+   this script will create a user named "Example User" with the email "example@example.com" and password "password". And it will add a few habits and entries.
 
 ## API Reference
 

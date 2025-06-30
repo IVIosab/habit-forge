@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "prep": "rm src/db/sqlite.db && npx drizzle-kit push",
+    "prep-db": "rm src/db/sqlite.db && npx drizzle-kit push",
+    "seed-db": "npx tsx src/db/seed.ts",
     "dev": "npx tsx src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js"
@@ -24,11 +25,14 @@
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.44.2",
+    "drizzle-seed": "^0.3.1",
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.0",
     "geoip-lite": "^1.4.10",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "nanoid": "^5.1.5",
+    "scrypt-js": "^3.0.1",
     "sqlite": "^5.1.1",
     "zod": "^3.25.64"
   },
