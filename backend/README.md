@@ -4,14 +4,14 @@
 
 <summary><strong>Table of Contents</strong></summary>
 
-- [Built With](#built-with-)
-- [Getting Started](#getting-started-)
-  - [Prerequisites](#prerequisites-)
-  - [Installation](#installation-)
-- [API Reference](#api-reference-)
-  - [Base URL](#base-url-)
-  - [Authentication](#authentication-)
-  - [Endpoints](#endpoints-)
+- [Built With](#built-with)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [API Reference](#api-reference)
+  - [Base URL](#base-url)
+  - [Authentication](#authentication)
+  - [Endpoints](#endpoints)
     - [Get All Posts](#get-all-posts)
     - [Create a New Post](#create-a-new-post)
 
